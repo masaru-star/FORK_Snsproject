@@ -1,206 +1,106 @@
-<!DOCTYPE html>
+
+<!doctype html>
+<!--
+  Title: [snsproject]
+  Author:[ayaneko]
+  License: CC BY-SA 4.0 or later
+  Full license text: https://creativecommons.org
+
+  (This work is also licensed under any later version of this license.)
+
+  Note: UI改善案です。是非活用してください。
+-->
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Snsproject</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="stylesheet" href="style.css">
-
 </head>
+
 <body>
-  <h1>投稿フォーム</h1>
-<p><a href="about.html">◀ 利用規約</a></p>
-  <input type="text" id="name" placeholder="名前を入力" /><br />
-  <input type="password" id="password" placeholder="パスワードを入力" /><br />
-  <textarea id="message" placeholder="メッセージを入力" rows="5" cols="30"></textarea><br />
-  <button onclick="postMessage()">投稿</button>
-<hr />
-<h2>ユーザー登録</h2>
-<input type="text" id="reg_name" placeholder="ユーザー名" /><br />
-<input type="password" id="reg_password" placeholder="パスワード" /><br />
-<button onclick="registerUser()">登録</button>
-<p id="reg_status"></p>
+  <div class="container">
+    <header>
+      <h1>Snsproject</h1>
+    </header>
 
-  <p id="status"></p>
+    <div class="announcement">
+      <i data-lucide="megaphone" size="18"></i>
+      <span>簡易的な端末ブロック機能を実装しています。</span>
+    </div>
+    <div class="terms-link">
+        <a href="about.html">利用前に必ず利用規約を<b>ご確認ください</b>。</a>
+    </div>
+    <nav class="tabs">
+      <button class="tab-btn active" onclick="switchTab('tab-view')">
+        <i data-lucide="message-square" size="18"></i>投稿一覧
+      </button>
+      <button class="tab-btn" onclick="switchTab('tab-post')">
+        <i data-lucide="pen-tool" size="18"></i>投稿する
+      </button>
+      <button class="tab-btn" onclick="switchTab('tab-user')">
+        <i data-lucide="user-plus" size="18"></i>登録
+      </button>
+    </nav>
 
-  <hr />
-  <h2>投稿一覧</h2>
-  <ul id="posts"></ul>
+    <div id="tab-view" class="card active">
+      <div class="refresh-area">
+          <button class="btn-refresh" onclick="loadPosts()">
+              <i data-lucide="rotate-cw" size="16"></i>更新
+          </button>
+      </div>
+      <ul id="posts">
+      </ul>
+    </div>
 
-  <script>
-  const url = "https://meseqsksebolzlyatpqq.supabase.co";
-const KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1lc2Vxc2tzZWJvbHpseWF0cHFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc5Mjg5MzQsImV4cCI6MjA3MzUwNDkzNH0.9CXWI7vDPhLIaesVma9fwJcaA8Ep4TqlCcorhyQzDsE";
+    <!-- 投稿フォーム -->
+    <div id="tab-post" class="card">
+      <div class="form-group">
+        <label>ユーザー名</label>
+        <input type="text" id="name" placeholder="登録した名前" />
+      </div>
+      <div class="form-group">
+        <label>パスワード</label>
+        <input type="password" id="password" placeholder="••••••••" />
+      </div>
+      <div class="form-group">
+        <label>メッセージ</label>
+        <textarea id="message" placeholder="いまどうしてる？" rows="5"></textarea>
+        <span id="char-count"></span>
+      </div>
+      <button class="btn-primary" onclick="postMessage()">
+        <i data-lucide="send" size="18"></i>投稿する
+      </button>
+      <p id="status" class="status-msg"></p>
+    </div>
 
-  // パスワードのハッシュ化
-async function hashPassword(password) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(password);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-  return hashHex;
-}
+    <!-- ユーザー登録 -->
+    <div id="tab-user" class="card">
+      <div class="form-group">
+        <label>希望するユーザー名</label>
+        <input type="text" id="reg_name" placeholder="ニックネームなど" />
+      </div>
+      <div class="form-group">
+        <label>パスワード</label>
+        <input type="password" id="reg_password" placeholder="パスワードを設定" />
+      </div>
+      <button class="btn-primary" onclick="registerUser()">
+        <i data-lucide="user-plus" size="18"></i>新しく登録する
+      </button>
+      <p id="reg_status" class="status-msg"></p>
+    </div>
+  </div>
 
-// ユーザー登録処理
-async function registerUser() {
-  const name = document.getElementById("reg_name").value;
-  const password = document.getElementById("reg_password").value;
-  const reg_status = document.getElementById("reg_status");
-
-  if (!name || !password) {
-    reg_status.textContent = "ユーザー名とパスワードを入力してください。";
-    return;
-  }
-
-  const hashedPassword = await hashPassword(password);
-
-  const checkRes = await fetch(`${url}/rest/v1/users?name=eq.${name}`, {
-    headers: {
-      "apikey": KEY,
-      "Authorization": `Bearer ${KEY}`
-    }
-  });
-  const existingUsers = await checkRes.json();
-
-  if (existingUsers.length > 0) {
-    reg_status.textContent = "このユーザー名はすでに使われています。";
-    return;
-  }
-
-  const res = await fetch(`${url}/rest/v1/users`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "apikey": KEY,
-      "Authorization": `Bearer ${KEY}`,
-      "Prefer": "return=representation"
-    },
-    body: JSON.stringify({ name, password: hashedPassword })
-  });
-
-  if (res.ok) {
-  reg_status.textContent = "登録が完了しました！";
-  document.getElementById("reg_name").value = "";
-  document.getElementById("reg_password").value = "";
-
-  // 運営アカウントでようこそ投稿
-  await fetch(`${url}/rest/v1/posts`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "apikey": KEY,
-      "Authorization": `Bearer ${KEY}`
-    },
-    body: JSON.stringify({
-      message: `ようこそ、${name}さん！`,
-      user_id: "07003402-51ea-4a7c-8279-0ef4258250af"
-    })
-  });
-} else {
-  reg_status.textContent = "登録に失敗しました。";
-}
-}
-  // 登録完了のメッセージなど
-
-
-
-
-async function postMessage() {
-  const name = document.getElementById("name").value;
-  const password = document.getElementById("password").value;
-  const message = document.getElementById("message").value;
-  const status = document.getElementById("status");
-
-  if (!name || !password || !message) {
-    status.textContent = "全ての項目を入力してね。";
-    return;
-  }
-
-  const hashedPassword = await hashPassword(password);
-
-  const authRes = await fetch(`${url}/rest/v1/users?name=eq.${name}&password=eq.${hashedPassword}`, {
-    headers: {
-      "apikey": KEY,
-      "Authorization": `Bearer ${KEY}`
-    }
-  });
-  const user = await authRes.json();
-
-  if (user.length === 0) {
-    status.textContent = "認証に失敗しました。";
-    return;
-  }
-
-  if (user[0].is_banned) {
-    status.textContent = "このユーザーは凍結されています。";
-    return;
-  }
-
-  const res = await fetch(`${url}/rest/v1/posts`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "apikey": KEY,
-      "Authorization": `Bearer ${KEY}`,
-      "Prefer": "return=representation"
-    },
-    body: JSON.stringify({
-      message,
-      user_id: user[0].id
-    })
-  });
-
-  if (res.ok) {
-    status.textContent = "投稿しました！";
-    document.getElementById("message").value = "";
-    loadPosts();
-  } else {
-    const errorText = await res.text();
-    alert("投稿エラー: " + errorText);
-    status.textContent = "投稿に失敗しました…";
-  }
-}
-
-// 投稿一覧読み込み関数
-async function loadPosts() {
-  const res = await fetch(`${url}/rest/v1/posts?select=message,created_at,fk_user(name,role)&order=created_at.desc`, {
-    headers: {
-      "apikey": KEY,
-      "Authorization": `Bearer ${KEY}`
-    }
-  });
-
-  if (!res.ok) {
-    alert("読み込み失敗: " + await res.text());
-    return;
-  }
-
-  const posts = await res.json();
-  const list = document.getElementById("posts");
-  list.innerHTML = "";
-
-  posts.forEach(post => {
-    const time = new Date(post.created_at).toLocaleString("ja-JP");
-    // fk_userにアクセスする
-    const name = post.fk_user?.name || "不明";
-    const role = post.fk_user?.role || "未設定";
-
-    const item = document.createElement("li");
-    item.textContent = `【${time}】${name}（${role}）: ${post.message}`;
-    list.appendChild(item);
-  });
-}
-
-
-// ページ読み込み時に投稿一覧を表示
-document.addEventListener("DOMContentLoaded", () => {
-  loadPosts();
-});
-
-
-
-  </script>
- </body>
+<script>
+lucide.createIcons();
+const url = "https://umjdioqfdzlwyflxtvyn.supabase.co";
+const KEY = "sb_publishable_PZtOSUKFBQVou-t-ECQwKw_50eq7Aom";
+</script>
+<script src="script.js"></script>
+</body>
 </html>
