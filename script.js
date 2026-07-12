@@ -122,12 +122,6 @@ async function postMessage() {
     showStatus(status, "すべての項目を入力してください。", "error");
     return;
   }
-
-  if (message.length > 150) {
-    showStatus(status, "投稿は150文字以内で入力してください。", "error");
-    return;
-  }
-
   const hashedPassword = await hashPassword(password);
   const encodedName = encodeURIComponent(name);
 
@@ -186,7 +180,7 @@ function startCooldown(btn) {
   if (!btn) return;
   isCooldown = true;
   btn.disabled = true;
-  let timeLeft = 30;
+  let timeLeft = 5;
   const originalText = btn.innerText;
 
   const timer = setInterval(() => {
