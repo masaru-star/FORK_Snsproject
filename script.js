@@ -296,3 +296,23 @@ document.addEventListener("DOMContentLoaded", () => {
     updateCharCount();
   }
 });
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function linkify(text) {
+  let escapedText = escapeHtml(text);
+  escapedText = escapedText.replace(
+    /&lt;\s*(\/?)\s*(h1|h2|br|b|i|s)\b[^&]*?&gt;/gi,
+    '<$1$2>'
+  );
+  const urlRegex = /https?:\/\/[^\s<]+[^<.,:;"')\]\s]/g;
+  return escapedText.replace(urlRegex, (url) => {
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color: blue;">${url}</a>`;
+  });
+}
