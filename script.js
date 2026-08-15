@@ -254,7 +254,7 @@ async function loadPosts() {
           </div>
           <span class="post-time">${time}</span>
         </div>
-        <div class="post-message">${escapeHTML(post.message)}</div>
+        <div class="post-message">${linkify(post.message)}</div>
       `;
       list.appendChild(li);
     });
