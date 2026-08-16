@@ -1,0 +1,3 @@
+```
+run bnchat.js setConfig https://umjdioqfdzlwyflxtvyn.supabase.co eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVtamRpb3FmZHpsd3lmbHh0dnluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3NDE3NDIsImV4cCI6MjA5OTMxNzc0Mn0.mXyaGHlk0HFyW6_H1IRVgI-tHOdZXkmsC6Y4H8PlaIE
+```
